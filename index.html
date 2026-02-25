@@ -10,11 +10,11 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --ph-color: #e53e3e;
-    --ph-bg: #fff5f5;
-    --sh-color: #2b6cb0;
-    --sh-bg: #ebf8ff;
-    --weekend-bg: #f7fafc;
+    --ph-color: #c53030;
+    --ph-bg: #fed7d7;
+    --sh-color: #1a56a0;
+    --sh-bg: #bee3f8;
+    --weekend-bg: #f0f4f8;
     --term-stripe: rgba(154, 230, 180, 0.18);
   }
 
@@ -58,10 +58,10 @@
     border: 1.5px solid rgba(0,0,0,0.12);
     flex-shrink: 0;
   }
-  .sw-ph   { background: var(--ph-bg);   border-color: var(--ph-color); }
-  .sw-sh   { background: var(--sh-bg);   border-color: var(--sh-color); }
-  .sw-both { background: linear-gradient(135deg, var(--ph-bg) 50%, var(--sh-bg) 50%); border-color: #805ad5; }
-  .sw-term { background: rgba(154, 230, 180, 0.4); border-color: #38a169; }
+  .sw-ph   { background: #fed7d7; border-color: #c53030; }
+  .sw-sh   { background: #bee3f8; border-color: #1a56a0; }
+  .sw-both { background: linear-gradient(135deg, #fed7d7 50%, #bee3f8 50%); border-color: #805ad5; }
+  .sw-term { background: #c6f6d5; border-color: #38a169; }
   .sw-wknd { background: var(--weekend-bg); border-color: #cbd5e0; }
 
   /* ── Grid ── */
@@ -136,8 +136,8 @@
   td.ph.sh     { background: linear-gradient(135deg, var(--ph-bg) 50%, var(--sh-bg) 50%); }
   td.ph.sh .day-num { color: #805ad5; }
   td.ph.sh .label   { color: #805ad5; }
-  td.term      { background: rgba(154, 230, 180, 0.14); }
-  td.term.weekend { background: linear-gradient(135deg, rgba(154,230,180,0.14) 50%, var(--weekend-bg) 50%); }
+  td.term      { background: #c6f6d5; }
+  td.term.weekend { background: linear-gradient(135deg, #c6f6d5 50%, var(--weekend-bg) 50%); }
 
   td.empty { background: #fafafa; }
 
