@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026 Victoria Calendar</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ph-color: #e53e3e;
+    --ph-bg: #fff5f5;
+    --sh-color: #2b6cb0;
+    --sh-bg: #ebf8ff;
+    --weekend-bg: #f7fafc;
+    --term-stripe: rgba(154, 230, 180, 0.18);
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #fff;
+    color: #1a202c;
+    font-size: 11px;
+  }
+
+  /* ── Cover header ── */
+  .cover {
+    text-align: center;
+    padding: 18px 20px 12px;
+    border-bottom: 3px solid #1a202c;
+    margin-bottom: 16px;
+  }
+  .cover h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; }
+  .cover p  { font-size: 13px; color: #4a5568; margin-top: 4px; }
+
+  /* ── Legend ── */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    padding: 0 20px 14px;
+    border-bottom: 1px solid #e2e8f0;
+    margin-bottom: 18px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10.5px;
+    font-weight: 500;
+  }
+  .swatch {
+    width: 16px; height: 16px;
+    border-radius: 3px;
+    border: 1.5px solid rgba(0,0,0,0.12);
+    flex-shrink: 0;
+  }
+  .sw-ph   { background: var(--ph-bg);   border-color: var(--ph-color); }
+  .sw-sh   { background: var(--sh-bg);   border-color: var(--sh-color); }
+  .sw-both { background: linear-gradient(135deg, var(--ph-bg) 50%, var(--sh-bg) 50%); border-color: #805ad5; }
+  .sw-term { background: rgba(154, 230, 180, 0.4); border-color: #38a169; }
+  .sw-wknd { background: var(--weekend-bg); border-color: #cbd5e0; }
+
+  /* ── Grid ── */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    padding: 0 14px 20px;
+  }
+
+  .month-card {
+    border: 1.5px solid #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .month-name {
+    background: #1a202c;
+    color: #fff;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 6px 0;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  .cal-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .cal-table th {
+    text-align: center;
+    font-size: 9px;
+    font-weight: 600;
+    color: #718096;
+    padding: 4px 2px 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+  .cal-table th.sun, .cal-table th.sat { color: #a0aec0; }
+  .cal-table td {
+    vertical-align: top;
+    padding: 2px 3px;
+    border-top: 1px solid #f0f0f0;
+    min-height: 30px;
+    width: 14.28%;
+    font-size: 10px;
+    line-height: 1.3;
+  }
+  .cal-table td .day-num {
+    display: block;
+    font-weight: 600;
+    font-size: 11px;
+    margin-bottom: 1px;
+  }
+  .cal-table td .label {
+    display: block;
+    font-size: 7.5px;
+    font-weight: 500;
+    line-height: 1.2;
+    color: #555;
+  }
+
+  /* day types */
+  td.weekend   { background: var(--weekend-bg); }
+  td.ph        { background: var(--ph-bg); }
+  td.ph .day-num { color: var(--ph-color); }
+  td.ph .label   { color: var(--ph-color); }
+  td.sh        { background: var(--sh-bg); }
+  td.sh .day-num { color: var(--sh-color); }
+  td.sh .label   { color: var(--sh-color); }
+  td.ph.sh     { background: linear-gradient(135deg, var(--ph-bg) 50%, var(--sh-bg) 50%); }
+  td.ph.sh .day-num { color: #805ad5; }
+  td.ph.sh .label   { color: #805ad5; }
+  td.term      { background: rgba(154, 230, 180, 0.14); }
+  td.term.weekend { background: linear-gradient(135deg, rgba(154,230,180,0.14) 50%, var(--weekend-bg) 50%); }
+
+  td.empty { background: #fafafa; }
+
+  /* ── Print styles ── */
+  @media print {
+    body { font-size: 9px; }
+    .cover { padding: 10px 20px 8px; }
+    .cover h1 { font-size: 22px; }
+    .grid { grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 0 10px 16px; }
+    .month-card { border: 1px solid #ccc; }
+  }
+
+  @page {
+    size: A4 landscape;
+    margin: 10mm;
+  }
+
+  /* ── School holiday note at bottom ── */
+  .footer-note {
+    text-align: center;
+    font-size: 9.5px;
+    color: #718096;
+    padding: 4px 20px 14px;
+    border-top: 1px solid #e2e8f0;
+    margin-top: 4px;
+  }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <h1>2026 Calendar &mdash; Victoria, Australia</h1>
+  <p>Public Holidays &amp; School Term Dates &bull; Victorian Government Schools</p>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="swatch sw-ph"></div> Public Holiday</div>
+  <div class="legend-item"><div class="swatch sw-sh"></div> School Holidays</div>
+  <div class="legend-item"><div class="swatch sw-both"></div> PH + School Holiday</div>
+  <div class="legend-item"><div class="swatch sw-term"></div> School Term (in session)</div>
+  <div class="legend-item"><div class="swatch sw-wknd"></div> Weekend</div>
+</div>
+
+<div class="grid" id="calendar"></div>
+
+<div class="footer-note">
+  School terms: Term 1: 27 Jan–2 Apr &bull; Term 2: 20 Apr–26 Jun &bull; Term 3: 13 Jul–18 Sep &bull; Term 4: 5 Oct–18 Dec &bull;
+  † AFL Grand Final Eve (25 Sep) subject to AFL schedule confirmation &bull; Independent/Catholic schools may vary
+</div>
+
+<script>
+// ──────────────────────────────────────────────
+// DATA
+// ──────────────────────────────────────────────
+
+// Public holidays: "YYYY-M-D" → label
+const publicHolidays = {
+  "2026-1-1":  "New Year's Day",
+  "2026-1-26": "Australia Day",
+  "2026-3-9":  "Labour Day",
+  "2026-4-3":  "Good Friday",
+  "2026-4-4":  "Easter Saturday",
+  "2026-4-5":  "Easter Sunday",
+  "2026-4-6":  "Easter Monday",
+  "2026-4-25": "ANZAC Day",
+  "2026-6-8":  "King's Birthday",
+  "2026-9-25": "AFL Grand Final Eve†",
+  "2026-11-3": "Melbourne Cup",
+  "2026-12-25":"Christmas Day",
+  "2026-12-26":"Boxing Day",
+  "2026-12-28":"Boxing Day (obs.)",
+};
+
+// School holidays (inclusive ranges): [startY,startM,startD, endY,endM,endD, label]
+const schoolHolidayRanges = [
+  // Summer break start of year (from previous year - Jan 1 to Jan 26)
+  [2026,1,1,  2026,1,26, "Summer Hols"],
+  // Autumn holidays
+  [2026,4,3,  2026,4,19, "Autumn Hols"],
+  // Winter holidays
+  [2026,6,27, 2026,7,12, "Winter Hols"],
+  // Spring holidays
+  [2026,9,19, 2026,10,4, "Spring Hols"],
+  // Summer end of year
+  [2026,12,19,2026,12,31,"Summer Hols"],
+];
+
+// School term ranges (in session)
+const termRanges = [
+  [2026,1,27,  2026,4,2,  "Term 1"],
+  [2026,4,20,  2026,6,26, "Term 2"],
+  [2026,7,13,  2026,9,18, "Term 3"],
+  [2026,10,5,  2026,12,18,"Term 4"],
+];
+
+function toNum(y,m,d){ return y*10000+m*100+d; }
+
+function inRanges(ranges, y, m, d){
+  const n = toNum(y,m,d);
+  for(const [sy,sm,sd,ey,em,ed] of ranges){
+    if(n >= toNum(sy,sm,sd) && n <= toNum(ey,em,ed)) return true;
+  }
+  return false;
+}
+
+function buildCalendar(){
+  const monthNames = ["January","February","March","April","May","June",
+                      "July","August","September","October","November","December"];
+  const dayNames = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  const container = document.getElementById("calendar");
+
+  for(let m=1; m<=12; m++){
+    const card = document.createElement("div");
+    card.className = "month-card";
+
+    const header = document.createElement("div");
+    header.className = "month-name";
+    header.textContent = monthNames[m-1];
+    card.appendChild(header);
+
+    const table = document.createElement("table");
+    table.className = "cal-table";
+
+    // day-of-week header
+    const thead = document.createElement("thead");
+    const hr = document.createElement("tr");
+    dayNames.forEach((d,i) => {
+      const th = document.createElement("th");
+      th.textContent = d;
+      if(i===0) th.className = "sun";
+      if(i===6) th.className = "sat";
+      hr.appendChild(th);
+    });
+    thead.appendChild(hr);
+    table.appendChild(thead);
+
+    const tbody = document.createElement("tbody");
+    const firstDay = new Date(2026, m-1, 1).getDay(); // 0=Sun
+    const daysInMonth = new Date(2026, m, 0).getDate();
+
+    let dayCount = 1;
+    let row;
+
+    // Fill weeks
+    for(let week=0; dayCount <= daysInMonth; week++){
+      row = document.createElement("tr");
+      for(let dow=0; dow<7; dow++){
+        const td = document.createElement("td");
+        const cellIndex = week*7 + dow;
+        if(cellIndex < firstDay || dayCount > daysInMonth){
+          td.className = "empty";
+          td.innerHTML = "&nbsp;";
+        } else {
+          const d = dayCount;
+          const key = `2026-${m}-${d}`;
+          const isWeekend = (dow === 0 || dow === 6);
+          const isPH = !!publicHolidays[key];
+          const isSH = inRanges(schoolHolidayRanges, 2026, m, d);
+          const isTerm = inRanges(termRanges, 2026, m, d);
+
+          let cls = "";
+          if(isPH && isSH) cls = "ph sh";
+          else if(isPH)    cls = "ph";
+          else if(isSH)    cls = "sh";
+          else if(isTerm)  cls = "term";
+          if(isWeekend && cls) cls += " weekend";
+          else if(isWeekend)   cls = "weekend";
+
+          td.className = cls || "";
+
+          const numSpan = document.createElement("span");
+          numSpan.className = "day-num";
+          numSpan.textContent = d;
+          td.appendChild(numSpan);
+
+          if(isPH){
+            const lbl = document.createElement("span");
+            lbl.className = "label";
+            lbl.textContent = publicHolidays[key];
+            td.appendChild(lbl);
+          } else if(isSH && !isPH && (d === 1 || (dow === 1 && d <= 7) || dow === 0)){
+            // show "Hols" label on first visible cell of holiday block in a week
+          }
+
+          dayCount++;
+        }
+        row.appendChild(td);
+      }
+      tbody.appendChild(row);
+    }
+
+    table.appendChild(tbody);
+    card.appendChild(table);
+    container.appendChild(card);
+  }
+}
+
+buildCalendar();
+</script>
+</body>
+</html>
