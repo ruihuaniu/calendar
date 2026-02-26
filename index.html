@@ -63,6 +63,7 @@
   .sw-both { background: linear-gradient(135deg, #fed7d7 50%, #bee3f8 50%); border-color: #805ad5; }
   .sw-term { background: #c6f6d5; border-color: #38a169; }
   .sw-wknd { background: var(--weekend-bg); border-color: #cbd5e0; }
+  .sw-today { background: #fef08a; border-color: #ca8a04; }
 
   /* ── Grid ── */
   .grid {
@@ -141,6 +142,71 @@
 
   td.empty { background: #fafafa; }
 
+  /* ── TODAY highlight ── */
+  td.today {
+    background: #fef08a !important;
+    outline: 2.5px solid #ca8a04;
+    outline-offset: -2px;
+    border-radius: 3px;
+    position: relative;
+    z-index: 1;
+  }
+  td.today .day-num { color: #78350f !important; font-weight: 800 !important; }
+  td.today .label   { color: #92400e !important; }
+
+  /* ── Weather widget ── */
+  .weather-section {
+    margin: 8px 14px 0;
+    padding: 14px 18px 16px;
+    background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 60%, #0c4a6e 100%);
+    border-radius: 12px;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+  }
+  .weather-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 80% 20%, rgba(255,255,255,0.06) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .weather-title {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #93c5fd;
+    margin-bottom: 10px;
+  }
+  .weather-cards { display: flex; gap: 10px; }
+  .w-card {
+    flex: 1;
+    background: rgba(255,255,255,0.09);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 10px;
+    padding: 10px 8px;
+    text-align: center;
+  }
+  .w-card.today-card { background: rgba(254,240,138,0.18); border-color: rgba(254,240,138,0.5); }
+  .w-day   { font-size: 9.5px; font-weight: 600; color: #bae6fd; margin-bottom: 4px; letter-spacing: 0.5px; text-transform: uppercase; }
+  .w-icon  { font-size: 28px; margin: 4px 0; display: block; }
+  .w-temp  { font-size: 17px; font-weight: 700; color: #fff; }
+  .w-rain  { font-size: 9px; color: #7dd3fc; margin-top: 4px; }
+  .w-cond  { font-size: 8.5px; color: #cbd5e1; margin-top: 3px; line-height: 1.3; }
+
+  @keyframes float    { 0%,100%{transform:translateY(0px)} 50%{transform:translateY(-6px)} }
+  @keyframes spin     { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+  @keyframes drift    { 0%,100%{transform:translateX(0px)} 50%{transform:translateX(6px)} }
+  @keyframes raindrop { 0%,100%{transform:translateY(-3px)} 50%{transform:translateY(3px)} }
+  @keyframes pulse    { 0%,100%{transform:scale(1)} 50%{transform:scale(1.08)} }
+
+  .anim-float  { animation: float    3.5s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite; }
+  .anim-spin   { animation: spin    10s   linear                                infinite; }
+  .anim-drift  { animation: drift   5s   cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite; }
+  .anim-rain   { animation: raindrop 2s   cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite; }
+  .anim-pulse  { animation: pulse   2.5s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite; }
+
   /* ── Print styles ── */
   @media print {
     body { font-size: 9px; }
@@ -148,6 +214,7 @@
     .cover h1 { font-size: 22px; }
     .grid { grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 0 10px 16px; }
     .month-card { border: 1px solid #ccc; }
+    .weather-section { display: none; }
   }
 
   @page {
@@ -179,9 +246,16 @@
   <div class="legend-item"><div class="swatch sw-both"></div> PH + School Holiday</div>
   <div class="legend-item"><div class="swatch sw-term"></div> School Term (in session)</div>
   <div class="legend-item"><div class="swatch sw-wknd"></div> Weekend</div>
+  <div class="legend-item"><div class="swatch sw-today"></div> Today</div>
 </div>
 
 <div class="grid" id="calendar"></div>
+
+<!-- Weather widget (live data: Thu 26 Feb 2026) -->
+<div class="weather-section" id="weather">
+  <div class="weather-title">📍 Melbourne 5-Day Forecast</div>
+  <div class="weather-cards" id="weather-cards"></div>
+</div>
 
 <div class="footer-note">
   School terms: Term 1: 27 Jan–2 Apr &bull; Term 2: 20 Apr–26 Jun &bull; Term 3: 13 Jul–18 Sep &bull; Term 4: 5 Oct–18 Dec &bull;
@@ -249,6 +323,11 @@ function buildCalendar(){
   const dayNames = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
   const container = document.getElementById("calendar");
 
+  const now = new Date();
+  const todayY = now.getFullYear();
+  const todayM = now.getMonth() + 1;
+  const todayD = now.getDate();
+
   for(let m=1; m<=12; m++){
     const card = document.createElement("div");
     card.className = "month-card";
@@ -261,7 +340,6 @@ function buildCalendar(){
     const table = document.createElement("table");
     table.className = "cal-table";
 
-    // day-of-week header
     const thead = document.createElement("thead");
     const hr = document.createElement("tr");
     dayNames.forEach((d,i) => {
@@ -275,15 +353,13 @@ function buildCalendar(){
     table.appendChild(thead);
 
     const tbody = document.createElement("tbody");
-    const firstDay = new Date(2026, m-1, 1).getDay(); // 0=Sun
+    const firstDay = new Date(2026, m-1, 1).getDay();
     const daysInMonth = new Date(2026, m, 0).getDate();
 
     let dayCount = 1;
-    let row;
 
-    // Fill weeks
     for(let week=0; dayCount <= daysInMonth; week++){
-      row = document.createElement("tr");
+      const row = document.createElement("tr");
       for(let dow=0; dow<7; dow++){
         const td = document.createElement("td");
         const cellIndex = week*7 + dow;
@@ -294,9 +370,10 @@ function buildCalendar(){
           const d = dayCount;
           const key = `2026-${m}-${d}`;
           const isWeekend = (dow === 0 || dow === 6);
-          const isPH = !!publicHolidays[key];
-          const isSH = inRanges(schoolHolidayRanges, 2026, m, d);
+          const isPH  = !!publicHolidays[key];
+          const isSH  = inRanges(schoolHolidayRanges, 2026, m, d);
           const isTerm = inRanges(termRanges, 2026, m, d);
+          const isToday = (todayY === 2026 && todayM === m && todayD === d);
 
           let cls = "";
           if(isPH && isSH) cls = "ph sh";
@@ -305,6 +382,7 @@ function buildCalendar(){
           else if(isTerm)  cls = "term";
           if(isWeekend && cls) cls += " weekend";
           else if(isWeekend)   cls = "weekend";
+          if(isToday) cls = (cls ? cls + " " : "") + "today";
 
           td.className = cls || "";
 
@@ -318,8 +396,6 @@ function buildCalendar(){
             lbl.className = "label";
             lbl.textContent = publicHolidays[key];
             td.appendChild(lbl);
-          } else if(isSH && !isPH && (d === 1 || (dow === 1 && d <= 7) || dow === 0)){
-            // show "Hols" label on first visible cell of holiday block in a week
           }
 
           dayCount++;
@@ -335,7 +411,48 @@ function buildCalendar(){
   }
 }
 
+// ──────────────────────────────────────────────
+// WEATHER WIDGET
+// ──────────────────────────────────────────────
+const forecast = [
+  { day: "Thu 26 Feb", highF: 76.8, rain: 10, condition: "partly_cloudy",  label: "Partly Sunny"  },
+  { day: "Fri 27 Feb", highF: 78.1, rain: 40, condition: "rainy",          label: "Showers Likely" },
+  { day: "Sat 28 Feb", highF: 79.8, rain: 25, condition: "partly_cloudy",  label: "Partly Cloudy"  },
+  { day: "Sun 1 Mar",  highF: 74.5, rain: 20, condition: "partly_cloudy",  label: "Partly Cloudy"  },
+  { day: "Mon 2 Mar",  highF: 73.5, rain: 65, condition: "rainy",          label: "Rain Likely"    },
+];
+
+function fToC(f){ return Math.round((f - 32) * 5/9); }
+
+function weatherIcon(condition, rain){
+  if(condition === "rainy" || rain >= 50) return { emoji:"🌧️", anim:"anim-rain"   };
+  if(rain >= 25)                          return { emoji:"🌦️", anim:"anim-float"  };
+  if(condition === "sunny")               return { emoji:"☀️",  anim:"anim-spin"   };
+  if(condition === "cloudy")              return { emoji:"☁️",  anim:"anim-drift"  };
+  return                                         { emoji:"⛅",  anim:"anim-float"  };
+}
+
+function buildWeather(){
+  const container = document.getElementById("weather-cards");
+  forecast.forEach((day, i) => {
+    const { emoji, anim } = weatherIcon(day.condition, day.rain);
+    const tempC = fToC(day.highF);
+    const isFirst = i === 0;
+    const card = document.createElement("div");
+    card.className = "w-card" + (isFirst ? " today-card" : "");
+    card.innerHTML = `
+      <div class="w-day">${isFirst ? "TODAY" : day.day.split(" ").slice(0,2).join(" ")}</div>
+      <span class="w-icon ${anim}" style="animation-delay:${i*0.25}s">${emoji}</span>
+      <div class="w-temp">${tempC}°<span class="w-unit">C</span></div>
+      <div class="w-rain">💧 ${day.rain}% rain</div>
+      <div class="w-cond">${day.label}</div>
+    `;
+    container.appendChild(card);
+  });
+}
+
 buildCalendar();
+buildWeather();
 </script>
 </body>
 </html>
