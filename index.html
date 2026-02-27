@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>2026 Victoria Calendar</title>
+<title>Victoria Calendar</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
@@ -28,12 +28,52 @@
   /* ── Cover header ── */
   .cover {
     text-align: center;
-    padding: 18px 20px 12px;
+    padding: 18px 20px 14px;
     border-bottom: 3px solid #1a202c;
     margin-bottom: 16px;
   }
   .cover h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; }
   .cover p  { font-size: 13px; color: #4a5568; margin-top: 4px; }
+
+  .year-selector {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+    background: #f0f4f8;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 4px 6px;
+  }
+  .year-btn {
+    background: #1a202c;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    width: 28px; height: 28px;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s;
+    flex-shrink: 0;
+  }
+  .year-btn:hover  { background: #2d3748; }
+  .year-btn:active { background: #4a5568; }
+  #year-select {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1a202c;
+    background: transparent;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 2px 4px;
+    appearance: none;
+    -webkit-appearance: none;
+    text-align: center;
+    min-width: 70px;
+  }
 
   /* ── Legend ── */
   .legend {
@@ -396,8 +436,13 @@
 <body>
 
 <div class="cover">
-  <h1>2026 Calendar &mdash; Victoria, Australia</h1>
+  <h1><span id="year-display">2026</span> Calendar &mdash; Victoria, Australia</h1>
   <p>Public Holidays &amp; School Term Dates &bull; Victorian Government Schools</p>
+  <div class="year-selector">
+    <button class="year-btn" id="prev-year">&#8592;</button>
+    <select id="year-select"></select>
+    <button class="year-btn" id="next-year">&#8594;</button>
+  </div>
 </div>
 
 <div class="legend">
@@ -422,132 +467,246 @@
   </div>
 </div>
 
-<div class="footer-note">
-  School terms: Term 1: 27 Jan–2 Apr &bull; Term 2: 20 Apr–26 Jun &bull; Term 3: 13 Jul–18 Sep &bull; Term 4: 5 Oct–18 Dec &bull;
-  † AFL Grand Final Eve (25 Sep) subject to AFL schedule confirmation &bull; Independent/Catholic schools may vary
+<div class="footer-note" id="footer-note">
+  † AFL Grand Final Eve subject to AFL schedule confirmation &bull; Independent/Catholic schools may vary &bull; ‡ Estimated dates
 </div>
 
 <script>
-// ──────────────────────────────────────────────
-// DATA
-// ──────────────────────────────────────────────
+// ══════════════════════════════════════════════
+// MULTI-YEAR DATA — Victoria, Australia
+// ══════════════════════════════════════════════
 
-// Public holidays: "YYYY-M-D" → label
-const publicHolidays = {
-  "2026-1-1":  "New Year's Day",
-  "2026-1-26": "Australia Day",
-  "2026-3-9":  "Labour Day",
-  "2026-4-3":  "Good Friday",
-  "2026-4-4":  "Easter Saturday",
-  "2026-4-5":  "Easter Sunday",
-  "2026-4-6":  "Easter Monday",
-  "2026-4-25": "ANZAC Day",
-  "2026-6-8":  "King's Birthday",
-  "2026-9-25": "AFL Grand Final Eve†",
-  "2026-11-3": "Melbourne Cup",
-  "2026-12-25":"Christmas Day",
-  "2026-12-26":"Boxing Day",
-  "2026-12-28":"Boxing Day (obs.)",
+const YEAR_DATA = {
+
+  // ── 2025 ──────────────────────────────────────
+  2025: {
+    publicHolidays: {
+      "2025-1-1":  "New Year's Day",
+      "2025-1-27": "Australia Day",
+      "2025-3-10": "Labour Day",
+      "2025-4-18": "Good Friday",
+      "2025-4-19": "Easter Saturday",
+      "2025-4-20": "Easter Sunday",
+      "2025-4-21": "Easter Monday",
+      "2025-4-25": "ANZAC Day",
+      "2025-6-9":  "King's Birthday",
+      "2025-9-26": "AFL Grand Final Eve†",
+      "2025-11-4": "Melbourne Cup",
+      "2025-12-25":"Christmas Day",
+      "2025-12-26":"Boxing Day",
+    },
+    schoolHols: [
+      [2025,1,1,  2025,1,27, "Summer Hols"],
+      [2025,4,5,  2025,4,22, "Autumn Hols"],
+      [2025,6,28, 2025,7,13, "Winter Hols"],
+      [2025,9,20, 2025,10,5, "Spring Hols"],
+      [2025,12,20,2025,12,31,"Summer Hols"],
+    ],
+    terms: [
+      [2025,1,28,  2025,4,4,  "Term 1"],
+      [2025,4,23,  2025,6,27, "Term 2"],
+      [2025,7,14,  2025,9,19, "Term 3"],
+      [2025,10,6,  2025,12,19,"Term 4"],
+    ],
+    termLabels: ["28 Jan–4 Apr","23 Apr–27 Jun","14 Jul–19 Sep","6 Oct–19 Dec"],
+    note: "† AFL Grand Final Eve subject to AFL schedule confirmation",
+  },
+
+  // ── 2026 ──────────────────────────────────────
+  2026: {
+    publicHolidays: {
+      "2026-1-1":  "New Year's Day",
+      "2026-1-26": "Australia Day",
+      "2026-3-9":  "Labour Day",
+      "2026-4-3":  "Good Friday",
+      "2026-4-4":  "Easter Saturday",
+      "2026-4-5":  "Easter Sunday",
+      "2026-4-6":  "Easter Monday",
+      "2026-4-25": "ANZAC Day",
+      "2026-6-8":  "King's Birthday",
+      "2026-9-25": "AFL Grand Final Eve†",
+      "2026-11-3": "Melbourne Cup",
+      "2026-12-25":"Christmas Day",
+      "2026-12-26":"Boxing Day",
+      "2026-12-28":"Boxing Day (obs.)",
+    },
+    schoolHols: [
+      [2026,1,1,  2026,1,26, "Summer Hols"],
+      [2026,4,3,  2026,4,19, "Autumn Hols"],
+      [2026,6,27, 2026,7,12, "Winter Hols"],
+      [2026,9,19, 2026,10,4, "Spring Hols"],
+      [2026,12,19,2026,12,31,"Summer Hols"],
+    ],
+    terms: [
+      [2026,1,27,  2026,4,2,  "Term 1"],
+      [2026,4,20,  2026,6,26, "Term 2"],
+      [2026,7,13,  2026,9,18, "Term 3"],
+      [2026,10,5,  2026,12,18,"Term 4"],
+    ],
+    termLabels: ["27 Jan–2 Apr","20 Apr–26 Jun","13 Jul–18 Sep","5 Oct–18 Dec"],
+    note: "† AFL Grand Final Eve subject to AFL schedule confirmation",
+  },
+
+  // ── 2027 ──────────────────────────────────────
+  // Public holidays confirmed; school terms estimated based on typical VIC patterns ‡
+  2027: {
+    publicHolidays: {
+      "2027-1-1":  "New Year's Day",
+      "2027-1-26": "Australia Day",
+      "2027-3-8":  "Labour Day",
+      "2027-3-26": "Good Friday",
+      "2027-3-27": "Easter Saturday",
+      "2027-3-28": "Easter Sunday",
+      "2027-3-29": "Easter Monday",
+      "2027-4-25": "ANZAC Day",
+      "2027-4-26": "ANZAC Day (obs.)",
+      "2027-6-14": "King's Birthday",
+      "2027-9-24": "AFL Grand Final Eve†",
+      "2027-11-2": "Melbourne Cup",
+      "2027-12-25":"Christmas Day",
+      "2027-12-26":"Boxing Day",
+      "2027-12-27":"Boxing Day (obs.)",
+    },
+    schoolHols: [
+      [2027,1,1,  2027,1,25, "Summer Hols"],
+      [2027,3,26, 2027,4,11, "Autumn Hols‡"],
+      [2027,6,26, 2027,7,11, "Winter Hols‡"],
+      [2027,9,18, 2027,10,3, "Spring Hols‡"],
+      [2027,12,18,2027,12,31,"Summer Hols‡"],
+    ],
+    terms: [
+      [2027,1,26,  2027,3,25, "Term 1‡"],
+      [2027,4,12,  2027,6,25, "Term 2‡"],
+      [2027,7,12,  2027,9,17, "Term 3‡"],
+      [2027,10,4,  2027,12,17,"Term 4‡"],
+    ],
+    termLabels: ["26 Jan–25 Mar‡","12 Apr–25 Jun‡","12 Jul–17 Sep‡","4 Oct–17 Dec‡"],
+    note: "† AFL Grand Final Eve subject to AFL schedule confirmation &bull; ‡ School term dates estimated — check education.vic.gov.au",
+  },
+
+  // ── 2028 ──────────────────────────────────────
+  // All dates estimated ‡
+  2028: {
+    publicHolidays: {
+      "2028-1-1":  "New Year's Day",
+      "2028-1-26": "Australia Day",
+      "2028-3-13": "Labour Day",
+      "2028-4-14": "Good Friday",
+      "2028-4-15": "Easter Saturday",
+      "2028-4-16": "Easter Sunday",
+      "2028-4-17": "Easter Monday",
+      "2028-4-25": "ANZAC Day",
+      "2028-6-12": "King's Birthday",
+      "2028-9-22": "AFL Grand Final Eve†",
+      "2028-11-7": "Melbourne Cup",
+      "2028-12-25":"Christmas Day",
+      "2028-12-26":"Boxing Day",
+    },
+    schoolHols: [
+      [2028,1,1,  2028,1,30, "Summer Hols‡"],
+      [2028,4,14, 2028,4,30, "Autumn Hols‡"],
+      [2028,6,24, 2028,7,9,  "Winter Hols‡"],
+      [2028,9,16, 2028,10,1, "Spring Hols‡"],
+      [2028,12,16,2028,12,31,"Summer Hols‡"],
+    ],
+    terms: [
+      [2028,1,31,  2028,4,13, "Term 1‡"],
+      [2028,5,1,   2028,6,23, "Term 2‡"],
+      [2028,7,10,  2028,9,15, "Term 3‡"],
+      [2028,10,2,  2028,12,15,"Term 4‡"],
+    ],
+    termLabels: ["31 Jan–13 Apr‡","1 May–23 Jun‡","10 Jul–15 Sep‡","2 Oct–15 Dec‡"],
+    note: "† AFL Grand Final Eve subject to AFL schedule confirmation &bull; ‡ All dates estimated — check education.vic.gov.au",
+  },
 };
 
-// School holidays (inclusive ranges): [startY,startM,startD, endY,endM,endD, label]
-const schoolHolidayRanges = [
-  // Summer break start of year (from previous year - Jan 1 to Jan 26)
-  [2026,1,1,  2026,1,26, "Summer Hols"],
-  // Autumn holidays
-  [2026,4,3,  2026,4,19, "Autumn Hols"],
-  // Winter holidays
-  [2026,6,27, 2026,7,12, "Winter Hols"],
-  // Spring holidays
-  [2026,9,19, 2026,10,4, "Spring Hols"],
-  // Summer end of year
-  [2026,12,19,2026,12,31,"Summer Hols"],
-];
+const AVAILABLE_YEARS = Object.keys(YEAR_DATA).map(Number).sort();
 
-// School term ranges (in session)
-const termRanges = [
-  [2026,1,27,  2026,4,2,  "Term 1"],
-  [2026,4,20,  2026,6,26, "Term 2"],
-  [2026,7,13,  2026,9,18, "Term 3"],
-  [2026,10,5,  2026,12,18,"Term 4"],
-];
+// ══════════════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════════════
+function toNum(y, m, d) { return y * 10000 + m * 100 + d; }
 
-function toNum(y,m,d){ return y*10000+m*100+d; }
-
-function inRanges(ranges, y, m, d){
-  const n = toNum(y,m,d);
-  for(const [sy,sm,sd,ey,em,ed] of ranges){
-    if(n >= toNum(sy,sm,sd) && n <= toNum(ey,em,ed)) return true;
+function inRanges(ranges, y, m, d) {
+  const n = toNum(y, m, d);
+  for (const [sy, sm, sd, ey, em, ed] of ranges) {
+    if (n >= toNum(sy, sm, sd) && n <= toNum(ey, em, ed)) return true;
   }
   return false;
 }
 
-function buildCalendar(){
-  const monthNames = ["January","February","March","April","May","June",
-                      "July","August","September","October","November","December"];
-  const dayNames = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-  const container = document.getElementById("calendar");
+// ══════════════════════════════════════════════
+// CALENDAR BUILDER
+// ══════════════════════════════════════════════
+const MONTH_NAMES = ["January","February","March","April","May","June",
+                     "July","August","September","October","November","December"];
+const DAY_NAMES   = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 
-  const now = new Date();
+function buildCalendar(year) {
+  const data      = YEAR_DATA[year];
+  const container = document.getElementById("calendar");
+  container.innerHTML = "";
+
+  const now    = new Date();
   const todayY = now.getFullYear();
   const todayM = now.getMonth() + 1;
   const todayD = now.getDate();
 
-  for(let m=1; m<=12; m++){
+  for (let m = 1; m <= 12; m++) {
     const card = document.createElement("div");
     card.className = "month-card";
 
-    const header = document.createElement("div");
-    header.className = "month-name";
-    header.textContent = monthNames[m-1];
-    card.appendChild(header);
+    const hdr = document.createElement("div");
+    hdr.className = "month-name";
+    hdr.textContent = MONTH_NAMES[m - 1];
+    card.appendChild(hdr);
 
     const table = document.createElement("table");
     table.className = "cal-table";
 
+    // Header row
     const thead = document.createElement("thead");
-    const hr = document.createElement("tr");
-    dayNames.forEach((d,i) => {
+    const hr    = document.createElement("tr");
+    DAY_NAMES.forEach((d, i) => {
       const th = document.createElement("th");
       th.textContent = d;
-      if(i===0) th.className = "sun";
-      if(i===6) th.className = "sat";
+      if (i === 0) th.className = "sun";
+      if (i === 6) th.className = "sat";
       hr.appendChild(th);
     });
     thead.appendChild(hr);
     table.appendChild(thead);
 
-    const tbody = document.createElement("tbody");
-    const firstDay = new Date(2026, m-1, 1).getDay();
-    const daysInMonth = new Date(2026, m, 0).getDate();
+    const tbody    = document.createElement("tbody");
+    const firstDay = new Date(year, m - 1, 1).getDay();
+    const dim      = new Date(year, m, 0).getDate();
+    let dayCount   = 1;
 
-    let dayCount = 1;
-
-    for(let week=0; dayCount <= daysInMonth; week++){
+    for (let week = 0; dayCount <= dim; week++) {
       const row = document.createElement("tr");
-      for(let dow=0; dow<7; dow++){
-        const td = document.createElement("td");
-        const cellIndex = week*7 + dow;
-        if(cellIndex < firstDay || dayCount > daysInMonth){
-          td.className = "empty";
-          td.innerHTML = "&nbsp;";
+      for (let dow = 0; dow < 7; dow++) {
+        const td        = document.createElement("td");
+        const cellIndex = week * 7 + dow;
+        if (cellIndex < firstDay || dayCount > dim) {
+          td.className  = "empty";
+          td.innerHTML  = "&nbsp;";
         } else {
-          const d = dayCount;
-          const key = `2026-${m}-${d}`;
-          const isWeekend = (dow === 0 || dow === 6);
-          const isPH  = !!publicHolidays[key];
-          const isSH  = inRanges(schoolHolidayRanges, 2026, m, d);
-          const isTerm = inRanges(termRanges, 2026, m, d);
-          const isToday = (todayY === 2026 && todayM === m && todayD === d);
+          const d       = dayCount;
+          const key     = `${year}-${m}-${d}`;
+          const isWknd  = dow === 0 || dow === 6;
+          const isPH    = !!(data.publicHolidays[key]);
+          const isSH    = inRanges(data.schoolHols, year, m, d);
+          const isTerm  = inRanges(data.terms,      year, m, d);
+          const isToday = todayY === year && todayM === m && todayD === d;
 
           let cls = "";
-          if(isPH && isSH) cls = "ph sh";
-          else if(isPH)    cls = "ph";
-          else if(isSH)    cls = "sh";
-          else if(isTerm)  cls = "term";
-          if(isWeekend && cls) cls += " weekend";
-          else if(isWeekend)   cls = "weekend";
-          if(isToday) cls = (cls ? cls + " " : "") + "today";
+          if (isPH && isSH)  cls = "ph sh";
+          else if (isPH)     cls = "ph";
+          else if (isSH)     cls = "sh";
+          else if (isTerm)   cls = "term";
+          if (isWknd && cls) cls += " weekend";
+          else if (isWknd)   cls = "weekend";
+          if (isToday)       cls = (cls ? cls + " " : "") + "today";
 
           td.className = cls || "";
 
@@ -556,13 +715,12 @@ function buildCalendar(){
           numSpan.textContent = d;
           td.appendChild(numSpan);
 
-          if(isPH){
+          if (isPH) {
             const lbl = document.createElement("span");
             lbl.className = "label";
-            lbl.textContent = publicHolidays[key];
+            lbl.textContent = data.publicHolidays[key];
             td.appendChild(lbl);
           }
-
           dayCount++;
         }
         row.appendChild(td);
@@ -574,23 +732,56 @@ function buildCalendar(){
     card.appendChild(table);
     container.appendChild(card);
   }
+
+  // Update footer
+  const termStr = (data.termLabels || []).map((l, i) => `T${i+1}: ${l}`).join(" &bull; ");
+  document.getElementById("footer-note").innerHTML =
+    `School terms: ${termStr} &bull; ${data.note || "Independent/Catholic schools may vary"}`;
 }
 
-// ──────────────────────────────────────────────
+// ══════════════════════════════════════════════
+// YEAR SELECTOR
+// ══════════════════════════════════════════════
+let currentYear = new Date().getFullYear();
+if (!YEAR_DATA[currentYear]) currentYear = 2026;
+
+function setYear(year) {
+  if (!YEAR_DATA[year]) return;
+  currentYear = year;
+  document.getElementById("year-display").textContent = year;
+  document.getElementById("year-select").value = year;
+  document.getElementById("prev-year").disabled = year <= AVAILABLE_YEARS[0];
+  document.getElementById("next-year").disabled = year >= AVAILABLE_YEARS[AVAILABLE_YEARS.length - 1];
+  buildCalendar(year);
+}
+
+// Populate dropdown
+const sel = document.getElementById("year-select");
+AVAILABLE_YEARS.forEach(y => {
+  const opt = document.createElement("option");
+  opt.value = y;
+  opt.textContent = y;
+  sel.appendChild(opt);
+});
+sel.addEventListener("change", () => setYear(Number(sel.value)));
+document.getElementById("prev-year").addEventListener("click", () => setYear(currentYear - 1));
+document.getElementById("next-year").addEventListener("click", () => setYear(currentYear + 1));
+
+// ══════════════════════════════════════════════
 // WEATHER — live from Open-Meteo (free, no API key)
-// ──────────────────────────────────────────────
+// ══════════════════════════════════════════════
 
 function weatherIcon(code) {
-  if (code === 0)        return { e: '☀️', a: 'anim-spin'  };
-  if (code <= 2)         return { e: '⛅', a: 'anim-float' };
-  if (code === 3)        return { e: '☁️', a: 'anim-drift' };
-  if (code <= 49)        return { e: '🌫️', a: 'anim-drift' };
-  if (code <= 59)        return { e: '🌦️', a: 'anim-float' };
-  if (code <= 69)        return { e: '🌧️', a: 'anim-rain'  };
-  if (code <= 79)        return { e: '🌨️', a: 'anim-float' };
-  if (code <= 82)        return { e: '🌧️', a: 'anim-rain'  };
-  if (code <= 86)        return { e: '❄️', a: 'anim-float' };
-  if (code <= 99)        return { e: '⛈️', a: 'anim-rain'  };
+  if (code === 0)   return { e: '☀️', a: 'anim-spin'  };
+  if (code <= 2)    return { e: '⛅', a: 'anim-float' };
+  if (code === 3)   return { e: '☁️', a: 'anim-drift' };
+  if (code <= 49)   return { e: '🌫️', a: 'anim-drift' };
+  if (code <= 59)   return { e: '🌦️', a: 'anim-float' };
+  if (code <= 69)   return { e: '🌧️', a: 'anim-rain'  };
+  if (code <= 79)   return { e: '🌨️', a: 'anim-float' };
+  if (code <= 82)   return { e: '🌧️', a: 'anim-rain'  };
+  if (code <= 86)   return { e: '❄️', a: 'anim-float' };
+  if (code <= 99)   return { e: '⛈️', a: 'anim-rain'  };
   return { e: '🌡️', a: 'anim-float' };
 }
 
@@ -663,7 +854,8 @@ async function buildWeather() {
   }
 }
 
-buildCalendar();
+// ── Init ──
+setYear(currentYear);
 buildWeather();
 </script>
 </body>
