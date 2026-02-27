@@ -275,6 +275,113 @@
     margin: 10mm;
   }
 
+  /* ── Responsive ── */
+
+  /* Large desktop: 4 columns (default) */
+  @media screen and (min-width: 1024px) {
+    .grid { grid-template-columns: repeat(4, 1fr); }
+    .weather-body { flex-direction: row; }
+    .w-card { border-right: 1px solid #e2e8f0; border-bottom: none; }
+    .w-card:last-child { border-right: none; }
+  }
+
+  /* Tablet landscape / small desktop: 3 columns */
+  @media screen and (max-width: 1023px) and (min-width: 700px) {
+    body { font-size: 12px; }
+    .cover h1 { font-size: 22px; }
+    .cover p  { font-size: 12px; }
+    .grid {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      padding: 0 12px 16px;
+    }
+    .weather-section { margin: 10px 12px 0; }
+    .weather-body { flex-direction: row; flex-wrap: wrap; }
+    .w-card {
+      flex: 1 1 calc(25% - 1px);
+      border-right: 1px solid #e2e8f0;
+      border-bottom: none;
+    }
+    .w-card:last-child { border-right: none; }
+  }
+
+  /* Mobile portrait: 2 columns */
+  @media screen and (max-width: 699px) {
+    body { font-size: 13px; }
+
+    .cover { padding: 14px 16px 10px; }
+    .cover h1 { font-size: 20px; }
+    .cover p  { font-size: 11px; }
+
+    .legend {
+      gap: 8px;
+      padding: 0 12px 12px;
+    }
+    .legend-item { font-size: 11px; }
+
+    .grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      padding: 0 10px 16px;
+    }
+
+    .month-card { min-width: 0; }
+
+    .month-name { font-size: 11px; padding: 6px 0; letter-spacing: 0; }
+
+    .cal-table { table-layout: fixed; width: 100%; }
+    .cal-table th {
+      font-size: 8px;
+      padding: 4px 0 3px;
+      letter-spacing: 0;
+    }
+    .cal-table td {
+      padding: 2px 1px;
+      min-height: 0;
+      overflow: hidden;
+    }
+    .cal-table td .day-num { font-size: 10px; margin-bottom: 0; }
+    .cal-table td .label   { font-size: 6.5px; line-height: 1.1; }
+
+    /* Weather stacks into 2-column grid on mobile */
+    .weather-section { margin: 10px 10px 0; }
+    .weather-header  { padding: 8px 12px; }
+    .weather-header-title { font-size: 12px; }
+    .weather-header-sub   { font-size: 10px; }
+
+    .weather-body {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .w-card {
+      border-right: none;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 14px 10px 12px;
+    }
+    .w-card:nth-last-child(-n+2):nth-child(odd),
+    .w-card:nth-last-child(-n+1) { border-bottom: none; }
+    .w-card:nth-child(odd)  { border-right: 1px solid #e2e8f0; }
+
+    .w-icon  { font-size: 30px; }
+    .w-temp  { font-size: 20px; }
+    .w-day   { font-size: 10px; }
+    .w-date  { font-size: 9px; }
+    .w-rain  { font-size: 10px; padding: 3px 8px; }
+    .w-cond  { font-size: 9px; }
+
+    .footer-note { font-size: 9px; padding: 8px 12px 14px; }
+  }
+
+  /* Very small phones */
+  @media screen and (max-width: 380px) {
+    .cover h1 { font-size: 17px; }
+    .grid { gap: 8px; padding: 0 8px 14px; }
+    .month-name { font-size: 10px; }
+    .cal-table th { font-size: 7px; }
+    .cal-table td .day-num { font-size: 9px; }
+    .cal-table td .label   { font-size: 6px; }
+  }
+
   /* ── School holiday note at bottom ── */
   .footer-note {
     text-align: center;
