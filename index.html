@@ -142,7 +142,7 @@
     text-transform: uppercase;
     letter-spacing: 0.3px;
   }
-  .cal-table th.sun, .cal-table th.sat { color: #a0aec0; }
+  .cal-table th.sat, .cal-table th.sun { color: #a0aec0; }
   .cal-table td {
     vertical-align: top;
     padding: 2px 3px;
@@ -640,7 +640,7 @@ function inRanges(ranges, y, m, d) {
 // ══════════════════════════════════════════════
 const MONTH_NAMES = ["January","February","March","April","May","June",
                      "July","August","September","October","November","December"];
-const DAY_NAMES   = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+const DAY_NAMES   = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
 
 function buildCalendar(year) {
   const data      = YEAR_DATA[year];
@@ -670,15 +670,17 @@ function buildCalendar(year) {
     DAY_NAMES.forEach((d, i) => {
       const th = document.createElement("th");
       th.textContent = d;
-      if (i === 0) th.className = "sun";
-      if (i === 6) th.className = "sat";
+      if (i === 5) th.className = "sat";
+      if (i === 6) th.className = "sun";
       hr.appendChild(th);
     });
     thead.appendChild(hr);
     table.appendChild(thead);
 
     const tbody    = document.createElement("tbody");
-    const firstDay = new Date(year, m - 1, 1).getDay();
+    // getDay() returns 0=Sun..6=Sat; convert to Mon=0..Sun=6
+    const rawFirst = new Date(year, m - 1, 1).getDay();
+    const firstDay = (rawFirst + 6) % 7;
     const dim      = new Date(year, m, 0).getDate();
     let dayCount   = 1;
 
@@ -693,7 +695,8 @@ function buildCalendar(year) {
         } else {
           const d       = dayCount;
           const key     = `${year}-${m}-${d}`;
-          const isWknd  = dow === 0 || dow === 6;
+          // dow 5=Sat, 6=Sun in Mon-start grid
+          const isWknd  = dow === 5 || dow === 6;
           const isPH    = !!(data.publicHolidays[key]);
           const isSH    = inRanges(data.schoolHols, year, m, d);
           const isTerm  = inRanges(data.terms,      year, m, d);
