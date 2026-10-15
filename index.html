@@ -748,6 +748,7 @@ function buildCalendar(year) {
 // ══════════════════════════════════════════════
 let currentYear = new Date().getFullYear();
 if (!YEAR_DATA[currentYear]) currentYear = 2026;
+let followsCurrentYear = true;
 
 function setYear(year) {
   if (!YEAR_DATA[year]) return;
@@ -767,9 +768,18 @@ AVAILABLE_YEARS.forEach(y => {
   opt.textContent = y;
   sel.appendChild(opt);
 });
-sel.addEventListener("change", () => setYear(Number(sel.value)));
-document.getElementById("prev-year").addEventListener("click", () => setYear(currentYear - 1));
-document.getElementById("next-year").addEventListener("click", () => setYear(currentYear + 1));
+sel.addEventListener("change", () => {
+  followsCurrentYear = false;
+  setYear(Number(sel.value));
+});
+document.getElementById("prev-year").addEventListener("click", () => {
+  followsCurrentYear = false;
+  setYear(currentYear - 1);
+});
+document.getElementById("next-year").addEventListener("click", () => {
+  followsCurrentYear = false;
+  setYear(currentYear + 1);
+});
 
 // ══════════════════════════════════════════════
 // WEATHER — live from Open-Meteo (free, no API key)
@@ -818,7 +828,7 @@ async function buildWeather() {
       '&timezone=Australia%2FMelbourne' +
       '&forecast_days=7';
 
-    const res  = await fetch(url);
+    const res  = await fetch(url, { cache: 'no-store' });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
 
@@ -861,6 +871,29 @@ async function buildWeather() {
 // ── Init ──
 setYear(currentYear);
 buildWeather();
+
+let lastPageReturnRefresh = Date.now();
+function refreshWhenPageReturns() {
+  if (document.visibilityState !== 'visible') return;
+
+  const now = Date.now();
+  if (now - lastPageReturnRefresh < 1000) return;
+  lastPageReturnRefresh = now;
+
+  const year = new Date().getFullYear();
+  if (followsCurrentYear && YEAR_DATA[year]) {
+    setYear(year);
+  } else {
+    buildCalendar(currentYear);
+  }
+  buildWeather();
+}
+
+document.addEventListener('visibilitychange', refreshWhenPageReturns);
+window.addEventListener('focus', refreshWhenPageReturns);
+window.addEventListener('pageshow', event => {
+  if (event.persisted) refreshWhenPageReturns();
+});
 </script>
 </body>
 </html>
